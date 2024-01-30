@@ -1,23 +1,21 @@
 import express from "express";
+import {
+  createTask,
+  deleteTask,
+  getAllTasks,
+  getTask,
+  updateTask,
+} from "../controllers/task";
+
 export const TaskRoute = express.Router();
 
 // version1 アプデでエンドポイント変わってもいいようにバージョンをつける
-TaskRoute.get("/", (req, res) => {
-  res.send("タスクを全て取得しました");
-});
+TaskRoute.get("/", getAllTasks);
 
-TaskRoute.post("/", (req, res) => {
-  res.send("タスクを新規作成しました");
-});
+TaskRoute.post("/", createTask);
 
-TaskRoute.get("/:id", (req, res) => {
-  res.send("ある特定のタスクを取得しました");
-});
+TaskRoute.get("/:id", getTask);
 
-TaskRoute.patch("/:id", (req, res) => {
-  res.send("ある特定のタスクを更新しました");
-});
+TaskRoute.patch("/:id", updateTask);
 
-TaskRoute.delete("/:id", (req, res) => {
-  res.send("ある特定のタスクを削除しました");
-});
+TaskRoute.delete("/:id", deleteTask);
