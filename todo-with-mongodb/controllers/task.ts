@@ -29,15 +29,23 @@ export const getTask = async (req: Request, res: Response) => {
   }
 };
 export const updateTask = async (req: Request, res: Response) => {
+  const _id = req.params.id;
   try {
-    const task = await TaskSchema.findOne({
-      _id: req.params.id,
-    });
-    res.status(201).json(task);
+    const updateTask = await TaskSchema.findOneAndUpdate(
+      {
+        _id,
+      },
+      req.body,
+      {
+        new: true,
+      },
+    );
+
+    res.status(201).json(updateTask);
   } catch (error) {
-    res.status(500).json(error);
+    res.status(500).json(`_id: ${_id}は存在しません`);
   }
 };
-export const deleteTask = (req: Request, res: Response) => {
+export const deleteTask = async (req: Request, res: Response) => {
   res.send("ある特定のタスクを削除しました");
 };
