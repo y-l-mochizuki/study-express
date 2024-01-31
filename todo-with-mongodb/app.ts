@@ -7,6 +7,7 @@ const app = express();
 const PORT = 5001;
 
 // データベース接続
+// mongodb の View Monitoring で確認できる
 const start = async () => {
   try {
     await connectDB(process.env.MONGODB_URL || "");
@@ -20,4 +21,6 @@ const start = async () => {
 
 start();
 
+// jsonを受け取れるようにする
+app.use(express.json());
 app.listen(PORT, () => console.log("サーバーが起動しました"));

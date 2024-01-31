@@ -2,7 +2,7 @@
 import mongoose from "mongoose";
 const { Schema } = mongoose;
 
-const TaskSchema = new Schema({
+const schema = new Schema({
   name: {
     type: String,
     trim: true,
@@ -15,4 +15,4 @@ const TaskSchema = new Schema({
   },
 });
 
-export default mongoose.model("Task", TaskSchema);
+export const TaskSchema = mongoose.model("Task", schema);
