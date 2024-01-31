@@ -1,12 +1,16 @@
 import { Request, Response } from "express";
 import { TaskSchema } from "../models";
 
-export const getAllTasks = (req: Request, res: Response) => {
-  res.send("タスクを全て取得しました");
+export const getAllTasks = async (req: Request, res: Response) => {
+  try {
+    const allTask = await TaskSchema.find({});
+    res.status(201).json(allTask);
+  } catch (error) {
+    res.status(500).json(error);
+  }
 };
 export const createTask = async (req: Request, res: Response) => {
   try {
-    console.log(req.body);
     const createTask = await TaskSchema.create(req.body);
     res.status(201).json(createTask);
   } catch (error) {
