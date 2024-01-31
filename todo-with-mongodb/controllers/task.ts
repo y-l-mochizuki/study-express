@@ -47,5 +47,14 @@ export const updateTask = async (req: Request, res: Response) => {
   }
 };
 export const deleteTask = async (req: Request, res: Response) => {
-  res.send("ある特定のタスクを削除しました");
+  const _id = req.params.id;
+  try {
+    const updateTask = await TaskSchema.findOneAndDelete({
+      _id,
+    });
+
+    res.status(201).json(updateTask);
+  } catch (error) {
+    res.status(500).json(`_id: ${_id}は存在しません`);
+  }
 };
