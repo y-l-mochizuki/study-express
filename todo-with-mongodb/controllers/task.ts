@@ -5,6 +5,7 @@ export const getAllTasks = async (req: Request, res: Response) => {
   try {
     const allTask = await TaskSchema.find({});
     res.status(201).json(allTask);
+    console.log("test");
   } catch (error) {
     res.status(500).json(error);
   }
