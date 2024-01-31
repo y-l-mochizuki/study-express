@@ -5,7 +5,6 @@ export const getAllTasks = async (req: Request, res: Response) => {
   try {
     const allTask = await TaskSchema.find({});
     res.status(201).json(allTask);
-    console.log("test");
   } catch (error) {
     res.status(500).json(error);
   }
@@ -18,8 +17,15 @@ export const createTask = async (req: Request, res: Response) => {
     res.status(500).json(error);
   }
 };
-export const getTask = (req: Request, res: Response) => {
-  res.send("ある特定のタスクを取得しました");
+export const getTask = async (req: Request, res: Response) => {
+  try {
+    const task = await TaskSchema.findOne({
+      _id: req.params.id,
+    });
+    res.status(201).json(task);
+  } catch (error) {
+    res.status(500).json(error);
+  }
 };
 export const updateTask = (req: Request, res: Response) => {
   res.send("ある特定のタスクを更新しました");
