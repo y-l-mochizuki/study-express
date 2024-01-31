@@ -1,4 +1,10 @@
 require("dotenv").config();
+if (process.env.NODE_ENV === "production") {
+  require("dotenv").config({ path: ".env.production" });
+} else {
+  require("dotenv").config({ path: ".env.development" });
+}
+
 import express from "express";
 import { TaskRoute } from "./routes/tasks";
 import { connectDB } from "./db/connect";
