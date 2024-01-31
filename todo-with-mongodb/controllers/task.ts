@@ -18,6 +18,17 @@ export const createTask = async (req: Request, res: Response) => {
   }
 };
 export const getTask = async (req: Request, res: Response) => {
+  const _id = req.params.id;
+  try {
+    const task = await TaskSchema.findOne({
+      _id,
+    });
+    res.status(201).json(task);
+  } catch (error) {
+    res.status(500).json(`_id: ${_id}は存在しません`);
+  }
+};
+export const updateTask = async (req: Request, res: Response) => {
   try {
     const task = await TaskSchema.findOne({
       _id: req.params.id,
@@ -26,9 +37,6 @@ export const getTask = async (req: Request, res: Response) => {
   } catch (error) {
     res.status(500).json(error);
   }
-};
-export const updateTask = (req: Request, res: Response) => {
-  res.send("ある特定のタスクを更新しました");
 };
 export const deleteTask = (req: Request, res: Response) => {
   res.send("ある特定のタスクを削除しました");
