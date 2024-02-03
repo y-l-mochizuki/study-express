@@ -1,6 +1,6 @@
 import express from "express";
 import { connectDB } from "./db";
-import { ItemModel } from "./models";
+import { Models } from "./models";
 
 const app = express();
 
@@ -21,7 +21,7 @@ type ItemType = {
 app.get("/items", async (_, res) => {
   try {
     await connectDB();
-    const items = (await ItemModel.find()) || [];
+    const items = (await Models.ItemModel.find()) || [];
     return res.status(200).json({
       message: "アイテム読み取り成功",
       items,
@@ -35,7 +35,7 @@ app.post("/items/new", async (req, res) => {
   try {
     await connectDB();
     const item = (
-      await ItemModel.create(req.body, {
+      await Models.ItemModel.create(req.body, {
         new: true,
       })
     )[0];
@@ -55,7 +55,7 @@ app.post("/items/new", async (req, res) => {
 app.get("/items/:_id", async ({ params: { _id } }, res) => {
   try {
     await connectDB();
-    const item = await ItemModel.findById({
+    const item = await Models.ItemModel.findById({
       _id,
     });
     return res.status(200).json({
@@ -72,7 +72,7 @@ app.get("/items/:_id", async ({ params: { _id } }, res) => {
 app.put("/items/:_id/edit", async ({ params: { _id }, body }, res) => {
   try {
     await connectDB();
-    const item = await ItemModel.findByIdAndUpdate(
+    const item = await Models.ItemModel.findByIdAndUpdate(
       {
         _id,
       },
@@ -95,7 +95,7 @@ app.put("/items/:_id/edit", async ({ params: { _id }, body }, res) => {
 app.delete("/items/:_id/delete", async ({ params: { _id } }, res) => {
   try {
     await connectDB();
-    const item = await ItemModel.findOneAndDelete({ _id });
+    const item = await Models.ItemModel.findOneAndDelete({ _id });
     if (item === null) {
       throw "アイテムが見つかりません";
     }
@@ -105,6 +105,42 @@ app.delete("/items/:_id/delete", async ({ params: { _id } }, res) => {
   } catch (error) {
     return res.status(500).json({
       message: typeof error === "string" ? error : "アイテム削除失敗",
+    });
+  }
+});
+
+app.post("/register", async (req, res) => {
+  try {
+    await connectDB();
+    await Models.UserModel.create(req.body);
+    return res.status(200).json({
+      message: "ユーザー登録成功",
+    });
+  } catch (error) {
+    return res.status(400).json({
+      message: "ユーザー登録失敗",
+    });
+  }
+});
+
+app.post("/login", async ({ body: { email, password } }, res) => {
+  try {
+    await connectDB();
+    const userData = await Models.UserModel.findOne({
+      email,
+    });
+    if (!userData) {
+      throw "ログイン失敗: ユーザー登録をしてください。";
+    }
+    if (password !== userData.password) {
+      throw "ログイン失敗: パスワードが違います。";
+    }
+    return res.status(200).json({
+      message: "ログイン成功",
+    });
+  } catch (error) {
+    return res.status(400).json({
+      message: typeof error === "string" ? error : "ログイン失敗",
     });
   }
 });
