@@ -15,6 +15,8 @@ const PORT = 5001;
 // データベース接続
 // mongodb の View Monitoring で確認できる
 const start = async () => {
+  console.log(process.env.MONGODB_URL);
+
   try {
     await connectDB(process.env.MONGODB_URL || "");
 
