@@ -1,6 +1,9 @@
+import "dotenv/config";
 import express from "express";
+import jwt from "jsonwebtoken";
 import { connectDB } from "./db";
 import { Models } from "./models";
+import { auth } from "./utils";
 
 const app = express();
 
@@ -10,18 +13,11 @@ const app = express();
 // express.json()はJSON形式のデータを解析する。req.bodyを通じてリクエスト本文内のデータにアクセスできるようになります
 app.use(express.json());
 
-type ItemType = {
-  title: string;
-  image: string;
-  price: string;
-  description: string;
-  email: string;
-};
-
-app.get("/items", async (_, res) => {
+app.get("/items", auth, async (req, res) => {
   try {
     await connectDB();
-    const items = (await Models.ItemModel.find()) || [];
+    const items =
+      (await Models.ItemModel.find({ email: req.body.email })) || [];
     return res.status(200).json({
       message: "アイテム読み取り成功",
       items,
@@ -31,7 +27,7 @@ app.get("/items", async (_, res) => {
   }
 });
 
-app.post("/items/new", async (req, res) => {
+app.post("/items/new", auth, async (req, res) => {
   try {
     await connectDB();
     const item = (
@@ -52,7 +48,7 @@ app.post("/items/new", async (req, res) => {
   }
 });
 
-app.get("/items/:_id", async ({ params: { _id } }, res) => {
+app.get("/items/:_id", auth, async ({ params: { _id } }, res) => {
   try {
     await connectDB();
     const item = await Models.ItemModel.findById({
@@ -69,10 +65,15 @@ app.get("/items/:_id", async ({ params: { _id } }, res) => {
   }
 });
 
-app.put("/items/:_id/edit", async ({ params: { _id }, body }, res) => {
+app.put("/items/:_id/edit", auth, async ({ params: { _id }, body }, res) => {
   try {
     await connectDB();
-    const item = await Models.ItemModel.findByIdAndUpdate(
+    const findItem = await Models.ItemModel.findById({ _id });
+    if (findItem?.email !== body.email) {
+      throw new Error("権限がありません");
+    }
+
+    const updateItem = await Models.ItemModel.findByIdAndUpdate(
       {
         _id,
       },
@@ -81,33 +82,51 @@ app.put("/items/:_id/edit", async ({ params: { _id }, body }, res) => {
         new: true,
       },
     );
+
+    if (!updateItem) {
+      throw new Error("アイテムが見つかりません");
+    }
+
     return res.status(200).json({
       message: "アイテム編集成功",
-      item,
+      item: updateItem,
     });
   } catch (error) {
+    const isError = error instanceof Error;
     return res.status(500).json({
-      message: "アイテム編集失敗",
+      message: isError ? error.message : "アイテム編集失敗",
     });
   }
 });
 
-app.delete("/items/:_id/delete", async ({ params: { _id } }, res) => {
-  try {
-    await connectDB();
-    const item = await Models.ItemModel.findOneAndDelete({ _id });
-    if (item === null) {
-      throw "アイテムが見つかりません";
+app.delete(
+  "/items/:_id/delete",
+  auth,
+  async ({ params: { _id }, body }, res) => {
+    try {
+      await connectDB();
+      const findItem = await Models.ItemModel.findById({ _id });
+      if (findItem?.email !== body.email) {
+        throw new Error("権限がありません");
+      }
+
+      const item = await Models.ItemModel.findOneAndDelete({ _id });
+
+      if (item === null) {
+        throw new Error("アイテムが見つかりません");
+      }
+
+      return res.status(200).json({
+        message: "アイテム削除成功",
+      });
+    } catch (error) {
+      const isError = error instanceof Error;
+      return res.status(500).json({
+        message: isError ? error.message : "アイテム削除失敗",
+      });
     }
-    return res.status(200).json({
-      message: "アイテム削除成功",
-    });
-  } catch (error) {
-    return res.status(500).json({
-      message: typeof error === "string" ? error : "アイテム削除失敗",
-    });
-  }
-});
+  },
+);
 
 app.post("/register", async (req, res) => {
   try {
@@ -135,8 +154,14 @@ app.post("/login", async ({ body: { email, password } }, res) => {
     if (password !== userData.password) {
       throw "ログイン失敗: パスワードが違います。";
     }
+    const secret_key = process.env.SECRET_KEY!;
+    const payload = {
+      email,
+    };
+    const token = jwt.sign(payload, secret_key, { expiresIn: "24h" });
     return res.status(200).json({
       message: "ログイン成功",
+      token,
     });
   } catch (error) {
     return res.status(400).json({
