@@ -1,11 +1,13 @@
 import "dotenv/config";
 import express from "express";
 import jwt from "jsonwebtoken";
+import cors from "cors";
 import { connectDB } from "./db";
 import { Models } from "./models";
 import { auth } from "./utils";
 
 const app = express();
+app.use(cors());
 
 // express.urlencoded({ extended: true })は、URLエンコードされたデータ（フォームから送信されたデータなど）を解析し、express.json()はJSON形式のデータを解析します
 // HTMLフォームから送信されるデータ json形式で送る場合には不要
