@@ -170,6 +170,7 @@ app.post("/login", async ({ body: { email, password } }, res) => {
   }
 });
 
-app.listen(5001, () => {
-  console.log("Listening on localhost port 5001");
+const port = process.env.PORT || 5001;
+app.listen(port, () => {
+  console.log(`Listening on localhost port ${port}`);
 });
