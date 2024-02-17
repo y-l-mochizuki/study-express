@@ -2,14 +2,15 @@
   "version": 2,
   "builds": [
     {
-      "src": "study-nest/dist/main.js",
+      "src": "study-nest/src/main.ts",
       "use": "@vercel/node"
     }
   ],
   "routes": [
     {
       "src": "/(.*)",
-      "dest": "study-nest/dist/main.js"
+      "dest": "study-nest/src/main.ts",
+      "methods": ["GET", "POST", "PUT", "DELETE"]
     }
   ]
 }
